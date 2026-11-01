@@ -1,0 +1,15 @@
+@font-face{font-family:'Instrument Sans';src:url('fonts/InstrumentSans.ttf') format('truetype');font-weight:400 700;font-stretch:75% 100%;font-display:block}
+:root{--accent:#ffffff;--sans:'Instrument Sans','Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;--system:'Segoe UI Variable Text','Segoe UI Variable','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;--font:var(--sans);--ease:cubic-bezier(.16,1,.3,1);--ease-spring:cubic-bezier(.34,1.56,.64,1);
+  /* customisable: corners (--r) and density (--d) are set from settings */
+  --r:12px;--d:1;}
+[data-font='system']{--font:var(--system)}
+[data-corners='square']{--r:0px}[data-corners='soft']{--r:7px}[data-corners='round']{--r:12px}
+[data-density='compact']{--d:.86}[data-density='comfy']{--d:1}[data-density='roomy']{--d:1.14}
+/* new site-matched themes */
+[data-theme='ink']{--bg:#181818;--panel:#202020;--fg:#f2f2f2;--muted:#8f8f8f;--line:rgba(255,255,255,.09);--hover:rgba(255,255,255,.07);--input:#222;--tab:#262626;--bgimg:none;color-scheme:dark;}
+[data-theme='chalk']{--bg:#ffffff;--panel:#ffffff;--fg:#181818;--muted:#6e6e6e;--line:rgba(24,24,24,.12);--hover:rgba(24,24,24,.06);--input:#f3f3f3;--tab:#eeeeee;--bgimg:none;color-scheme:light;}
+[data-theme='graphite']{--bg:#232323;--panel:#2b2b2b;--fg:#ededed;--muted:#929292;--line:rgba(255,255,255,.09);--hover:rgba(255,255,255,.07);--input:#2d2d2d;--tab:#333;--bgimg:none;color-scheme:dark;}
+[data-theme='mono']{--bg:#000;--panel:#121212;--fg:#f2f2f2;--muted:#808080;--line:rgba(255,255,255,.09);--hover:rgba(255,255,255,.07);--input:#141414;--tab:#1a1a1a;--bgimg:none;color-scheme:dark;}
+[data-theme='smoke']{--bg:#e9e9e9;--panel:#f6f6f6;--fg:#1c1c1c;--muted:#6a6a6a;--line:rgba(0,0,0,.1);--hover:rgba(0,0,0,.06);--input:#f6f6f6;--tab:#f8f8f8;--bgimg:none;color-scheme:light;}
+/* custom theme: the two chosen colours arrive as --cbg / --cfg, everything else is mixed from them */
+[data-theme='custom']{--bg:var(--cbg,#181818);--fg:var(--cfg,#f2f2f2);--panel:color-mix(in srgb,var(--cbg,#181818) 93%,var(--cfg,#f2f2f2));--muted:color-mix(in srgb,var(--cfg,#f2f2f2) 58%,var(--cbg,#181818));--line:color-mix(in srgb,var(--cfg,#f2f2f2) 11%,transparent);--hover:color-mix(in srgb,var(--cfg,#f2f2f2) 8%,transparent);--input:color-mix(in srgb,var(--cbg,#181818) 91%,var(--cfg,#f2f2f2));--tab:color-mix(in srgb,var(--cbg,#181818) 87%,var(--cfg,#f2f2f2));--bgimg:none;color-scheme:var(--cscheme,dark);}

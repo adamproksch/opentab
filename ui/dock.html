@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Music</title>
+<link rel="stylesheet" href="themes.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html,body{height:100%;background:transparent;overflow:hidden}
+body{font-family:var(--font);color:var(--fg);padding:2px;user-select:none}
+.card{height:100%;background:var(--panel);border:1px solid var(--line);border-radius:calc(var(--r) * 1.4);padding:10px 12px 12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,.3);animation:in .3s var(--ease) both}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.head{display:flex;align-items:center;gap:4px}
+.head .src{flex:1;color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em}
+.head button{width:24px;height:24px;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center;font:600 15px/1 var(--font)}
+.head button:hover{background:var(--hover);color:var(--fg)}
+.t{font-weight:600;font-size:14px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a{color:var(--muted);font-size:12px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctl{display:flex;gap:6px;align-items:center;justify-content:center}
+.ctl button{width:34px;height:34px;border-radius:50%;border:0;background:var(--hover);color:var(--fg);display:grid;place-items:center;cursor:pointer;transition:transform .3s var(--ease-spring),background .2s}
+.ctl button:hover{transform:scale(1.08);background:var(--line)}
+.ctl button.big{width:40px;height:40px;background:var(--fg);color:var(--bg)}
+.ctl button.on{color:#1db954}
+.ctl svg{width:16px;height:16px;fill:currentColor}
+.ctl .gap{flex:1}
+.pill{border:0;border-radius:999px;padding:8px 14px;background:var(--fg);color:var(--bg);font:600 12px var(--font);cursor:pointer;align-self:flex-start}
+.np{display:flex;gap:10px;align-items:center;min-width:0}
+.np img,.noart{width:56px;height:56px;border-radius:8px;flex:none;background:var(--hover);object-fit:cover}
+.np .meta{min-width:0;flex:1}
+.bar{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+input[type=range]{flex:1;accent-color:var(--fg);height:4px;cursor:pointer;min-width:0}
+.tabs{display:flex;gap:4px}
+.tabs button{flex:1;border:0;border-radius:8px;padding:6px;background:transparent;color:var(--muted);font:600 11.5px var(--font);cursor:pointer}
+.tabs button.on{background:var(--hover);color:var(--fg)}
+.q{width:100%;border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:8px;padding:7px 9px;font:13px var(--font);outline:none}
+.body{display:flex;flex-direction:column;gap:10px;flex:1;min-height:0}
+.list{flex:1;overflow:auto;display:flex;flex-direction:column;gap:2px;margin:0 -4px}
+.li{display:flex;gap:8px;align-items:center;padding:5px 4px;border-radius:8px;cursor:pointer;min-width:0}
+.li:hover{background:var(--hover)}
+.li img,.li .noart{width:34px;height:34px;border-radius:5px}
+.li .t{font-size:12.5px}.li .a{font-size:11px}
+.err{color:#ed4245;font-size:11px}
+.li .x{border:0;background:none;color:var(--muted);font-size:15px;width:22px;height:22px;border-radius:6px;cursor:pointer;opacity:0;flex:none}
+.li:hover .x{opacity:1}
+.li .x:hover{background:var(--hover);color:var(--fg)}
+#pins{flex:1;min-height:40px}
+.link{background:none;border:0;color:var(--muted);font:11px var(--font);cursor:pointer;text-decoration:underline;align-self:flex-start}
+.like{border:0;background:none;color:inherit;cursor:pointer;display:grid}
+.like svg{width:16px;height:16px;stroke-width:1.8}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head"><span class="src" id="src">Music</span>
+    <button id="min" title="Minimise to the toolbar">–</button>
+    <button id="close" title="Close">×</button>
+  </div>
+  <div class="body" id="main"></div>
+</div>
+<script>
+const api = window.opentab;
+const $ = (s) => document.querySelector(s);
+const FILL = {
+  prev: '<path d="M7 6h2v12H7zM20 6v12l-9-6z"/>', next: '<path d="M15 6h2v12h-2zM4 6v12l9-6z"/>',
+  play: '<path d="M8 5v14l11-7z"/>', pause: '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>',
+};
+const LINE = {
+  heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  shuffle: '<path d="M3 7h3l9 10h4M3 17h3l3-3.3M14 10.3 15 7h4M17 4l3 3-3 3M17 14l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+  repeat: '<path d="M4 11V9a2 2 0 0 1 2-2h13M16 4l3 3-3 3M20 13v2a2 2 0 0 1-2 2H5M8 20l-3-3 3-3" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+};
+const svg = (d) => `<svg viewBox="0 0 24 24">${d}</svg>`;
+const esc = (s) => String(s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const fmt = (ms) => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+const sp = (action, extra) => api.cmd('spotify', { action, ...extra });
+let S = null;
+
+$('#min').onclick = () => api.cmd('musicMode', { mode: 'mini' });
+$('#close').onclick = () => api.cmd('musicMode', { mode: 'closed' });
+
+function render() {
+  const st = S.settings;
+  Object.assign(document.body.dataset, { theme: st.theme, corners: st.corners, font: st.font }); {const c=({theme:st.theme,custom:S.custom}).custom,r=document.documentElement.style;if(c){r.setProperty('--cbg',c.bg);r.setProperty('--cfg',c.fg);}document.body.style.colorScheme=({theme:st.theme,custom:S.custom}).theme==='custom'&&c?(c.dark?'dark':'light'):'';}
+  if (S.spotify?.connected) return renderSpotify(S.spotify);
+  built = '';
+  renderLocal(S.media || {});
+}
+
+// ── not signed in: Windows media controls + Spotify app hand-off (free, no account setup)
+let localBuilt = false, pinsSig = null;
+function renderLocal(m) {
+  const main = $('#main');
+  // the search and pin boxes are built once so typing isn't wiped by state updates
+  if (!localBuilt) {
+    localBuilt = true;
+    main.innerHTML = `<div id="np"></div>
+      <input class="q" id="find" placeholder="Search Spotify…" spellcheck="false">
+      <div class="a" style="font-weight:600;color:var(--fg)">Pinned</div>
+      <div class="list" id="pins"></div>
+      <input class="q" id="pin" placeholder="Paste a Spotify playlist or album link to pin it" spellcheck="false">
+      <div id="foot"></div>`;
+    $('#find').onkeydown = (e) => { if (e.key === 'Enter' && e.target.value.trim()) { api.cmd('mediaCmd', { action: 'search', value: e.target.value }); e.target.value = ''; } };
+    $('#pin').onkeydown = (e) => { if (e.key === 'Enter' && e.target.value.trim()) { api.cmd('addMusicPin', { link: e.target.value }); e.target.value = ''; } };
+  }
+  $('#src').textContent = m.ok ? (/spotify/i.test(m.app || '') ? 'Spotify' : 'Now playing') : 'Music';
+  const dur = m.duration || 0;
+  $('#np').innerHTML = m.ok
+    ? `<div class="np">${m.art ? `<img src="${esc(m.art)}" alt="">` : '<div class="noart"></div>'}
+         <div class="meta"><div class="t">${esc(m.title) || 'Nothing playing'}</div><div class="a">${esc(m.artist)}</div></div></div>
+       ${dur > 0 ? `<div class="bar" style="margin-top:10px"><span id="cur">${fmt(livePos(m))}</span><input type="range" id="seek" min="0" max="${dur}" value="${livePos(m)}" ${m.canSeek ? '' : 'disabled'}><span>${fmt(dur)}</span></div>` : ''}
+       <div class="ctl" style="margin-top:8px"><button data-a="prev" title="Previous">${svg(FILL.prev)}</button><button class="big" data-a="toggle" title="Play / pause">${svg(m.playing ? FILL.pause : FILL.play)}</button><button data-a="next" title="Next">${svg(FILL.next)}</button></div>`
+    : `<div class="np"><div class="noart"></div><div class="meta"><div class="t">Nothing playing</div><div class="a">Play something in the Spotify app</div></div></div>
+       <div class="ctl" style="margin-top:8px"><button class="pill" data-a="open" style="align-self:center">Open Spotify</button></div>`;
+  $('#np').querySelectorAll('[data-a]').forEach((b) => { b.onclick = () => api.cmd('mediaCmd', { action: b.dataset.a }); });
+  const seek = $('#seek'); if (seek) seek.onchange = () => api.cmd('mediaCmd', { action: 'seek', value: +seek.value });
+  // pinned playlists: click opens it in the Spotify app
+  const pins = S.settings.musicPins || [];
+  const sig = JSON.stringify(pins);
+  if (sig !== pinsSig) {
+    pinsSig = sig;
+    $('#pins').innerHTML = pins.map((p, i) => `<div class="li" data-i="${i}">${p.art ? `<img src="${esc(p.art)}" alt="">` : '<div class="noart"></div>'}<div style="min-width:0;flex:1"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.uri.split(':')[1])}</div></div><button class="x" title="Unpin">×</button></div>`).join('')
+      || '<div class="a" style="padding:4px">Pin playlists you play often — paste a link below.</div>';
+    $('#pins').querySelectorAll('.li').forEach((row) => {
+      const p = pins[+row.dataset.i];
+      row.onclick = () => api.cmd('mediaCmd', { action: 'openUri', value: p.uri });
+      row.querySelector('.x').onclick = (e) => { e.stopPropagation(); api.cmd('removeMusicPin', { uri: p.uri }); };
+    });
+  }
+  $('#foot').innerHTML = `<button class="link" data-sp="connect">Sign in with Spotify (optional, needs a Premium developer account)</button>${S.spotify?.error ? `<div class="err">${esc(S.spotify.error)}</div>` : ''}`;
+  $('#foot').querySelector('[data-sp]').onclick = () => sp('connect');
+}
+// where the song is now: the helper reports position at a moment in time, the UI keeps it moving
+function livePos(m) { return Math.min(m.duration || 0, (m.position || 0) + (m.playing ? Date.now() - (m.at || Date.now()) : 0)); }
+setInterval(() => {
+  if (!S || dragging || S.spotify?.connected) return;
+  const m = S.media || {}, seek = $('#seek'), cur = $('#cur');
+  if (!m.ok || !m.playing || !seek) return;
+  seek.value = livePos(m); cur.textContent = fmt(livePos(m));
+}, 1000);
+
+// ── signed in: now playing + search + playlists
+let tab = 'now', list = [], query = '', built = '', qTimer = null;
+function renderSpotify(s) {
+  localBuilt = false; pinsSig = null;
+  $('#src').textContent = 'Spotify';
+  const main = $('#main');
+  // build the frame once per tab so the search box and scroll position survive state updates
+  if (built !== tab) {
+    built = tab;
+    main.innerHTML = `<div class="tabs">${[['now', 'Now playing'], ['search', 'Search'], ['playlists', 'Playlists']].map(([k, l]) => `<button data-tab="${k}" class="${k === tab ? 'on' : ''}">${l}</button>`).join('')}</div><div class="body" id="pane"></div>`;
+    main.querySelectorAll('[data-tab]').forEach((b) => { b.onclick = () => { tab = b.dataset.tab; list = []; render(); if (tab === 'playlists') loadList(sp('playlists')); }; });
+    const pane = $('#pane');
+    if (tab === 'search') {
+      pane.innerHTML = '<input class="q" placeholder="Search songs" spellcheck="false"><div class="list"></div>';
+      const q = pane.querySelector('.q'); q.value = query; setTimeout(() => q.focus(), 30);
+      q.oninput = () => { query = q.value; clearTimeout(qTimer); qTimer = setTimeout(() => loadList(sp('search', { q: query })), 300); };
+      if (query) loadList(sp('search', { q: query }));
+    } else if (tab === 'playlists') pane.innerHTML = '<div class="list"></div>';
+  }
+  if (tab !== 'now') return;
+  const dur = s.duration || 1, pos = Math.min(dur, s.progress + (s.playing ? Date.now() - s.at : 0));
+  $('#pane').innerHTML = `
+    <div class="np">${s.art ? `<img src="${esc(s.art)}" alt="">` : '<div class="noart"></div>'}
+      <div class="meta"><div class="t">${esc(s.title) || 'Nothing playing'}</div><div class="a">${esc(s.artist)}</div></div>
+      <button class="like" data-c="like" title="${s.liked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}"><svg viewBox="0 0 24 24" style="fill:${s.liked ? '#1db954' : 'none'};stroke:${s.liked ? '#1db954' : 'currentColor'}">${LINE.heart}</svg></button></div>
+    <div class="bar"><span>${fmt(pos)}</span><input type="range" id="seek" min="0" max="${dur}" value="${pos}"><span>${fmt(dur)}</span></div>
+    <div class="ctl">
+      <button data-c="shuffle" class="${s.shuffle ? 'on' : ''}" title="Shuffle"><svg viewBox="0 0 24 24">${LINE.shuffle}</svg></button>
+      <span class="gap"></span>
+      <button data-c="prev" title="Previous">${svg(FILL.prev)}</button><button class="big" data-c="toggle" title="Play / pause">${svg(s.playing ? FILL.pause : FILL.play)}</button><button data-c="next" title="Next">${svg(FILL.next)}</button>
+      <span class="gap"></span>
+      <button data-c="repeat" class="${s.repeat !== 'off' ? 'on' : ''}" title="Repeat: ${s.repeat}"><svg viewBox="0 0 24 24">${LINE.repeat}</svg></button>
+    </div>
+    ${s.volume == null ? '' : `<div class="bar"><span>Volume</span><input type="range" id="vol" min="0" max="100" value="${s.volume}"></div>`}
+    <div class="a">${s.device ? 'Playing on ' + esc(s.device) : 'No active device — open Spotify on any device'}</div>
+    ${s.error ? `<div class="err">${esc(s.error)}</div>` : ''}
+    <button class="link" data-c="disconnect">Sign out of Spotify</button>`;
+  $('#pane').querySelectorAll('[data-c]').forEach((b) => { b.onclick = () => sp(b.dataset.c); });
+  $('#seek').onchange = (e) => sp('seek', { value: +e.target.value });
+  const vol = $('#vol'); if (vol) vol.onchange = () => sp('volume', { value: +vol.value });
+}
+async function loadList(promise) {
+  list = (await promise) || [];
+  const el = document.querySelector('#pane .list');
+  if (!el) return;
+  el.innerHTML = list.map((x, i) => `<div class="li" data-i="${i}">${x.art ? `<img src="${esc(x.art)}" alt="">` : '<div class="noart"></div>'}<div style="min-width:0"><div class="t">${esc(x.title)}</div><div class="a">${esc(x.sub)}</div></div></div>`).join('') || '<div class="a" style="padding:8px">Nothing here</div>';
+  el.querySelectorAll('.li').forEach((row) => { const x = list[+row.dataset.i]; row.onclick = () => sp('play', /:track:/.test(x.uri) ? { uri: x.uri } : { context: x.uri }); });
+}
+
+// don't redraw the now-playing pane while the user is dragging a slider
+let dragging = false;
+document.addEventListener('pointerdown', (e) => { if (e.target.type === 'range') dragging = true; });
+document.addEventListener('pointerup', () => { dragging = false; });
+api.onState((s) => { S = s; if (!dragging) render(); });
+api.ready();
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+# opentab.cc — Fair Use License
+
+Copyright (c) opentab. All rights reserved.
+
+## 1. Free to use, if you respect it
+You can download, install, and use this software **for free**, for personal or non-commercial use, as long as you follow this license.
+
+## 2. You may NOT
+- Sell, rent, or charge money for this software or any copy of it.
+- Re-upload, re-brand, or claim this software (or its code) as your own.
+- Remove or change this license or the credit to the author.
+- Use it to harass people, break laws, spread malware, or harm others.
+- Copy the code into another project without written permission from the author.
+
+## 3. The author can take it away
+This license is a **privilege, not a right.** The author can **revoke (cancel) your license** if you break the rules above or the Terms of Service, if your copy is used for abuse, fraud or a security threat, if the law requires it, or if opentab is discontinued.
+If your license is revoked, you must stop using the software and delete every copy you have.
+The author may also change or end this license for future versions at any time.
+
+## 4. No warranty
+This software is given **"as is."** No promises it works, is safe, or fits any purpose.
+The author is **not responsible** for any damage, data loss, or problems from using it.
+
+## 5. Third-party stuff
+This software is built on Electron/Chromium and uses outside services (like LRCLIB for lyrics). Those parts have their own licenses and terms, which still apply to them.
+
+## 6. Agreement
+By installing or using this software, you agree to this license. If you don't agree, don't use it.
+
+Questions or permission requests: contact@opentab.cc.

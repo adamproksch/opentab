@@ -1,0 +1,80 @@
+{
+  "name": "opentab",
+  "productName": "opentab",
+  "version": "1.1.15",
+  "description": "opentab - a customizable Chromium browser for Windows with built-in ad and tracker blocking.",
+  "main": "main.js",
+  "author": "Adam Proksch Creative",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis portable --x64 --publish never && node build/bootstrap.js",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "build": {
+    "appId": "com.opentab.browser",
+    "productName": "opentab",
+    "copyright": "Copyright © 2026 Adam Proksch Creative",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "page-preload.js",
+      "blocklist.js",
+      "spotify.js",
+      "media.ps1",
+      "lib/**",
+      "ui/**",
+      "pages/**",
+      "build/icon.png",
+      "package.json"
+    ],
+    "asar": true,
+    "compression": "maximum",
+    "electronLanguages": [
+      "en-US"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "artifactName": "opentab-Setup.${ext}",
+      "deleteAppDataOnUninstall": false,
+      "include": "build/installer.nsh"
+    },
+    "portable": {
+      "artifactName": "opentab-Portable.${ext}"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "adamproksch",
+      "repo": "opentab-releases",
+      "releaseType": "release"
+    }
+  },
+  "devDependencies": {
+    "electron": "45.0.0",
+    "electron-builder": "^26.18.0",
+    "png-to-ico": "^3.0.2",
+    "sharp": "^0.35.5"
+  },
+  "dependencies": {
+    "@ghostery/adblocker-electron": "^2.20.3",
+    "electron-updater": "^6.8.11"
+  }
+}

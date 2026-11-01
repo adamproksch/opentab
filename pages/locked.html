@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Support</title>
+<link rel="stylesheet" href="opentab://assets/themes.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--fg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:40px;text-align:center;-webkit-font-smoothing:antialiased}
+.logo{width:56px;height:56px;border-radius:14px;opacity:.9}
+h1{font-size:24px;font-weight:600;letter-spacing:-.02em}
+p{color:var(--muted);font-size:15px;line-height:1.6;max-width:460px}
+.msg{color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 20px;max-width:460px;font-size:14.5px;line-height:1.55}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:12px;min-width:320px}
+.field{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.field .k{color:var(--muted);font-size:13px}
+.field .v{font-family:ui-monospace,Consolas,monospace;font-size:14px}
+.btn{height:36px;padding:0 16px;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:10px;font:inherit;font-weight:600;font-size:13px;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--hover)}
+.btn.pri{background:var(--accent);color:var(--on-accent,#141414);border-color:transparent}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.foot{position:fixed;bottom:16px;right:16px;display:flex;gap:8px}
+</style>
+</head>
+<body data-theme="ink">
+<img class="logo" src="opentab://assets/logo.svg" alt="">
+<h1>opentab needs attention</h1>
+<p id="intro">This copy of opentab has been disabled. Please contact support to sort it out.</p>
+<div class="msg" id="msg" hidden></div>
+<div class="card">
+  <div class="field"><span class="k">Your user ID</span><span class="v" id="uid">—</span></div>
+  <div class="field"><span class="k">Support</span><span class="v" id="support">—</span></div>
+  <div class="row">
+    <button class="btn" id="copy">Copy ID</button>
+    <a class="btn pri" id="email" href="#">Email support</a>
+  </div>
+</div>
+<p>Quote your user ID when you reach out. You can close opentab at any time.</p>
+<div class="foot">
+  <button class="btn" id="close">Close window</button>
+</div>
+<script>
+const api = window.opentab;
+const $ = (s) => document.querySelector(s);
+let info = { uid: '', support: 'support@opentab.cc', message: '' };
+api.onLock((d) => {
+  info = d;
+  Object.assign(document.body.dataset, { theme: d.theme || 'ink', corners: d.corners, font: d.font }); {const c=d.custom,r=document.documentElement.style;if(c){r.setProperty('--cbg',c.bg);r.setProperty('--cfg',c.fg);}document.body.style.colorScheme=d.theme==='custom'&&c?(c.dark?'dark':'light'):'';}
+  $('#uid').textContent = d.uid || '—';
+  $('#support').textContent = d.support || '—';
+  if (d.message) { $('#msg').textContent = d.message; $('#msg').hidden = false; $('#intro').hidden = true; }
+  $('#email').href = 'mailto:' + (d.support || '') + '?subject=' + encodeURIComponent('opentab support — ID ' + (d.uid || ''));
+});
+$('#copy').onclick = () => api.cmd('copyText', { text: info.uid });
+$('#close').onclick = () => api.cmd('lockClose');
+api.ready();
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>opentab</title>
+<link rel="stylesheet" href="themes.css">
+<link rel="stylesheet" href="ui.css">
+</head>
+<body data-theme="ink">
+<div id="chrome">
+  <!-- only shown when tabs are on the left or right: drag area + window buttons -->
+  <div id="sideHead"><div class="grab"></div></div>
+  <div id="tabstrip">
+    <button id="wsBtn" class="ws-btn nodrag" title="Workspaces" aria-label="Workspaces"></button>
+    <div id="pins" class="pins nodrag" role="tablist" aria-label="Pinned tabs"></div>
+    <div id="tabs" class="tabs nodrag" role="tablist" aria-label="Tabs"></div>
+    <button id="newTab" class="ib nodrag" title="New tab" aria-label="New tab"></button>
+    <div class="spacer"></div>
+  </div>
+  <div id="toolbar">
+    <button id="back" class="ib" title="Back" aria-label="Back"></button>
+    <button id="fwd" class="ib" title="Forward" aria-label="Forward"></button>
+    <button id="reload" class="ib" title="Reload" aria-label="Reload"></button>
+    <div id="omni">
+      <button id="secIcon" title="Site information" aria-label="Site information"></button>
+      <input id="omniInput" type="text" spellcheck="false" autocomplete="off" placeholder="Search or type a URL" aria-label="Address and search bar">
+      <button id="shield" class="chip" title="Shield" aria-label="Ad and tracker blocking"></button>
+      <button id="star" class="ib sm" title="Bookmark" aria-label="Bookmark this page"></button>
+    </div>
+    <div id="mini" hidden></div>
+    <span class="grow" id="grow"></span>
+    <button id="dl" class="ib" title="Downloads" aria-label="Downloads" hidden></button>
+    <button id="menu" class="ib" title="Menu" aria-label="Menu"></button>
+  </div>
+  <div id="bmbar" role="toolbar" aria-label="Bookmarks bar"></div>
+</div>
+<div id="permBar" role="alertdialog" aria-live="assertive" hidden></div>
+<div id="overlay"><div id="panel" role="dialog" tabindex="-1"></div></div>
+<div id="editLayer"></div>
+<div id="toastStrip"><div id="toast" role="status" aria-live="polite"></div></div>
+<script src="ui.js"></script>
+</body>
+</html>

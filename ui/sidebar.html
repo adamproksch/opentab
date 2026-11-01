@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sidebar</title>
+<link rel="stylesheet" href="themes.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:transparent}
+body{font-family:var(--font);color:var(--fg);background:var(--bg);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px;user-select:none;overflow:hidden;border-right:1px solid var(--line)}
+body.right{border-right:0;border-left:1px solid var(--line)}
+#items{display:flex;flex-direction:column;gap:4px;align-items:center;overflow-y:auto;scrollbar-width:none;flex:1;width:100%}
+.it{position:relative;width:38px;height:38px;flex:none;border:0;background:transparent;border-radius:var(--r);display:grid;place-items:center;color:var(--muted);cursor:pointer;transition:background .25s var(--ease),color .25s var(--ease),transform .35s var(--ease-spring)}
+.it:hover{background:var(--hover);color:var(--fg);transform:scale(1.06)}
+.it.on{background:var(--hover);color:var(--fg)}
+.it.on::before{content:'';position:absolute;top:9px;bottom:9px;width:3px;border-radius:3px;background:var(--accent);left:-7px}
+body.right .it.on::before{left:auto;right:-7px}
+.it svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.it img{width:20px;height:20px;border-radius:5px}
+.it .letter{width:22px;height:22px;border-radius:6px;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:650;color:var(--fg)}
+.it .dot{position:absolute;right:4px;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--muted)}
+.it .badge{position:absolute;right:1px;top:1px;min-width:15px;height:15px;padding:0 4px;border-radius:8px;background:var(--fg);color:var(--bg);font-size:9.5px;font-weight:700;display:grid;place-items:center}
+.it.dragging{opacity:.35}
+.sep{width:22px;height:1px;background:var(--line);margin:4px 0;flex:none}
+#tip{position:fixed;pointer-events:none;opacity:0}
+</style>
+</head>
+<body>
+<div id="items"></div>
+<div class="sep"></div>
+<button class="it" id="add" title="Add this page to the sidebar"></button>
+<button class="it" id="mode" title="Switch overlay / docked"></button>
+<button class="it" id="edit" title="Edit layout (Ctrl+Shift+E)"></button>
+<script>
+const api = window.opentab;
+const $ = (s) => document.querySelector(s);
+const ICON = {
+  bookmarks: '<path d="M7 3h10a1 1 0 0 1 1 1v17l-6-4-6 4V4a1 1 0 0 1 1-1z"/>',
+  history: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  tabs: '<rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M3.5 9.5h17M8 5v4.5"/>',
+  notes: '<path d="M5 4h10l4 4v12H5z"/><path d="M15 4v4h4M8.5 12.5h7M8.5 16h5"/>',
+  add: '<path d="M12 5v14M5 12h14"/>',
+  overlay: '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><rect x="6" y="7" width="6" height="10" rx="1.5"/>',
+  docked: '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M10 4.5v15"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+};
+const svg = (k) => `<svg viewBox="0 0 24 24">${ICON[k]}</svg>`;
+let S = null, dragId = null;
+
+function render() {
+  const st = S.settings;
+  Object.assign(document.body.dataset, { theme: st.theme, corners: st.corners, font: st.font }); {const c=({theme:st.theme,custom:S.custom}).custom,r=document.documentElement.style;if(c){r.setProperty('--cbg',c.bg);r.setProperty('--cfg',c.fg);}document.body.style.colorScheme=({theme:st.theme,custom:S.custom}).theme==='custom'&&c?(c.dark?'dark':'light'):'';}
+  document.documentElement.style.setProperty('--accent', S.accentColor);
+  document.body.classList.toggle('right', st.sidebar === 'right');
+  if (dragId) return; // don't rebuild under the cursor mid-drag
+  const box = $('#items'); box.innerHTML = '';
+  for (const it of S.sidebarItems) {
+    const b = document.createElement('button');
+    b.className = 'it' + (S.activePanel === it.id ? ' on' : '');
+    b.title = it.title;
+    b.draggable = true;
+    if (it.type === 'builtin') b.innerHTML = svg(it.id);
+    else if (it.favicon) { const img = new Image(); img.src = it.favicon; img.onerror = () => { img.replaceWith(letter(it.title)); }; b.append(img); }
+    else b.append(letter(it.title));
+    if (it.badge) b.insertAdjacentHTML('beforeend', `<span class="badge">${it.badge > 99 ? '99+' : it.badge}</span>`);
+    else if (it.open && it.type === 'web' && S.activePanel !== it.id) b.insertAdjacentHTML('beforeend', '<span class="dot"></span>');
+    b.onclick = () => api.cmd('togglePanel', { id: it.id });
+    b.oncontextmenu = (e) => { e.preventDefault(); api.cmd('panelMenu', { id: it.id }); };
+    b.addEventListener('dragstart', () => { dragId = it.id; b.classList.add('dragging'); });
+    b.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const src = box.querySelector('.dragging'); if (!src || src === b) return;
+      const r = b.getBoundingClientRect();
+      box.insertBefore(src, e.clientY < r.top + r.height / 2 ? b : b.nextSibling);
+    });
+    b.addEventListener('dragend', () => {
+      const order = [...box.children].map((x) => x.dataset.id);
+      dragId = null;
+      const items = order.map((id) => S.settings.sidebarItems.find((x) => x.id === id)).filter(Boolean);
+      api.cmd('setSetting', { key: 'sidebarItems', value: items });
+    });
+    b.dataset.id = it.id;
+    box.append(b);
+  }
+  $('#add').style.opacity = S.canAddPanel ? '' : '.4';
+  $('#mode').innerHTML = svg(st.sidebarMode === 'docked' ? 'docked' : 'overlay');
+  $('#mode').title = st.sidebarMode === 'docked' ? 'Panels are docked (click for overlay)' : 'Panels float over the page (click to dock)';
+  $('#edit').classList.toggle('on', S.editMode);
+}
+function letter(t) { const s = document.createElement('span'); s.className = 'letter'; s.textContent = (t || '?').replace(/^www\./, '')[0].toUpperCase(); return s; }
+
+$('#add').innerHTML = svg('add');
+$('#edit').innerHTML = svg('edit');
+$('#add').onclick = () => api.cmd('addPanel', {});
+$('#mode').onclick = () => api.cmd('setSetting', { key: 'sidebarMode', value: S.settings.sidebarMode === 'docked' ? 'overlay' : 'docked' });
+$('#edit').onclick = () => api.cmd('setEditMode', { on: !S.editMode });
+api.onState((s) => { S = s; render(); });
+api.ready();
+</script>
+</body>
+</html>
